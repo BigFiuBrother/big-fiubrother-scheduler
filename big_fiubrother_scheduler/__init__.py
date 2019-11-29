@@ -1,1 +1,2 @@
 from big_fiubrother_scheduler.schedule_completed_processes import ScheduleCompletedProcesses
+from big_fiubrother_scheduler.remove_completed_processes import RemoveCompletedProcesses

@@ -9,7 +9,8 @@ from big_fiubrother_core import (
     setup
 )
 from big_fiubrother_scheduler import (
-    ScheduleCompletedProcesses
+    ScheduleCompletedProcesses,
+    RemoveCompletedProcesses
 )
 
 
@@ -20,15 +21,21 @@ if __name__ == "__main__":
 
     consumer_to_scheduler_queue = Queue()
     scheduler_to_publisher_queue = Queue()
+    scheduler_to_removal_queue = Queue()
 
     consumer = StoppableThread(
         ConsumeFromRabbitMQ(configuration=configuration['consumer'],
                             output_queue=consumer_to_scheduler_queue))
 
-    video_sampler = StoppableThread(
-        ScheduleCompletedProcesses(configuration=configuration,
+    scheduler = StoppableThread(
+        ScheduleCompletedProcesses(configuration=configuration['db'],
                                    input_queue=consumer_to_scheduler_queue,
-                                   output_queue=scheduler_to_publisher_queue))
+                                   publisher_queue=scheduler_to_publisher_queue,
+                                   removal_queue=scheduler_to_removal_queue))
+
+    removal = StoppableThread(
+        ConsumeFromRabbitMQ(configuration=configuration['db'],
+                            output_queue=consumer_to_scheduler_queue))
 
     publisher = StoppableThread(
         PublishToRabbitMQ(configuration=configuration['publisher'],
