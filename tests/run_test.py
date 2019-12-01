@@ -1,13 +1,13 @@
 from big_fiubrother_core.message_clients.rabbitmq import Publisher
-from big_fiubrother_core.message import (
+from big_fiubrother_core.messages import (
     ProcessedFaceMessage,
     ProcessedFrameMessage
 )
 from big_fiubrother_core.db import (
     VideoChunk,
     Frame,
-    ProcessedFrame,
-    ProcessedVideoChunk,
+    FrameProcess,
+    VideoChunkProcess,
     Database
 )
 
@@ -20,16 +20,6 @@ db_configuration = {
 }
 
 db = Database(db_configuration)
-
-publisher_configuration = {
-    'host': 'localhost',
-    'username': 'fiubrother',
-    'password': 'alwayswatching',
-    'exchange': 'fiubrother',
-    'routing_key': 'scheduler'
-}
-
-publisher = Publisher(publisher_configuration)
 
 video_chunk = VideoChunk(camera_id='CAMERA',
                          timestamp=0.0,
@@ -46,15 +36,25 @@ for offset in range(2):
     frame_ids.append(frame.id)
 
 
-db.add(ProcessedVideoChunk(video_chunk_id=video_chunk.id,
-                           total_frames_count=2))
+db.add(VideoChunkProcess(video_chunk_id=video_chunk.id,
+                         total_frames_count=2))
 
-db.add(ProcessedFrame(frame_id=frame_ids[0],
-                      total_faces_count=2))
+db.add(FrameProcess(frame_id=frame_ids[0],
+                    total_faces_count=2))
 
+# Publish messages for run
+
+publisher_configuration = {
+    'host': 'localhost',
+    'username': 'fiubrother',
+    'password': 'alwayswatching',
+    'exchange': 'fiubrother',
+    'routing_key': 'scheduler'
+}
+
+publisher = Publisher(publisher_configuration)
 
 publisher.publish(ProcessedFrameMessage(video_chunk_id=video_chunk.id))
 
 for i in range(2):
     publisher.publish(ProcessedFaceMessage(frame_id=frame_ids[0]))
-

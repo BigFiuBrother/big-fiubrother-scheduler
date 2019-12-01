@@ -1,0 +1,16 @@
+consumer:
+  host: localhost
+  username: fiubrother
+  password: alwayswatching
+  queue: scheduler
+publisher:
+  host: localhost
+  username: fiubrother
+  password: alwayswatching
+  exchange: fiubrother
+  routing_key: analysed_video_chunks
+db:
+  host: localhost
+  database: big_fiubrother_test
+  username: postgres
+  password: password
