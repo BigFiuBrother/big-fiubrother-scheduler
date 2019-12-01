@@ -26,7 +26,7 @@ publisher_configuration = {
     'username': 'fiubrother',
     'password': 'alwayswatching',
     'exchange': 'fiubrother',
-    'routing_key': 'frames'
+    'routing_key': 'scheduler'
 }
 
 publisher = Publisher(publisher_configuration)
@@ -53,7 +53,8 @@ db.add(ProcessedFrame(frame_id=frame_ids[0],
                       total_faces_count=2))
 
 
-for frame_id in frame_ids:
-    publisher.publish(ProcessedFaceMessage(frame_id=frame_id))
-
 publisher.publish(ProcessedFrameMessage(video_chunk_id=video_chunk.id))
+
+for i in range(2):
+    publisher.publish(ProcessedFaceMessage(frame_id=frame_ids[0]))
+

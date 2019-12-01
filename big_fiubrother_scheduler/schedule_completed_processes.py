@@ -1,4 +1,5 @@
 from . import ProcessScheduler
+from big_fiubrother_core import QueueTask
 
 
 class ScheduleCompletedProcesses(QueueTask):

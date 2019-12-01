@@ -1,9 +1,10 @@
 from big_fiubrother_core.db import (
     Database,
-    ProcessedFrame,
-    ProcessedVideoChunk,
+    FrameProcess,
+    VideoChunkProcess,
     Frame
 )
+from big_fiubrother_core import QueueTask
 
 
 class RemoveCompletedProcesses(QueueTask):
@@ -24,9 +25,9 @@ class RemoveCompletedProcesses(QueueTask):
 
         with self.db.transaction():
             for frame_id in frame_ids:
-                self.db.delete(ProcessedFrame(frame_id=frame_id))
+                self.db.delete(FrameProcess(frame_id=frame_id))
 
-            self.db.delete(ProcessedVideoChunk(video_chunk_id=video_chunk_id))
+            self.db.delete(VideoChunkProcess(video_chunk_id=video_chunk_id))
 
     def close(self):
         self.db.close()
