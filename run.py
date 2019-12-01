@@ -28,14 +28,15 @@ if __name__ == "__main__":
                             output_queue=consumer_to_scheduler_queue))
 
     scheduler = StoppableThread(
-        ScheduleCompletedProcesses(configuration=configuration['db'],
-                                   input_queue=consumer_to_scheduler_queue,
-                                   publisher_queue=scheduler_to_publisher_queue,
-                                   removal_queue=scheduler_to_removal_queue))
+        ScheduleCompletedProcesses(
+            configuration=configuration['db'],
+            input_queue=consumer_to_scheduler_queue,
+            publisher_queue=scheduler_to_publisher_queue,
+            removal_queue=scheduler_to_removal_queue))
 
     removal = StoppableThread(
-        ConsumeFromRabbitMQ(configuration=configuration['db'],
-                            output_queue=consumer_to_scheduler_queue))
+        RemoveCompletedProcesses(configuration=configuration['db'],
+                                 input_queue=scheduler_to_removal_queue))
 
     publisher = StoppableThread(
         PublishToRabbitMQ(configuration=configuration['publisher'],
@@ -46,14 +47,17 @@ if __name__ == "__main__":
     print('[*] Configuration finished. Starting big-fiubrother-scheduler!')
 
     publisher.start()
+    removal.start()
     scheduler.start()
     consumer.run()
 
     # Signal Handled STOP
     scheduler.stop()
     publisher.stop()
+    removal.stop()
 
     scheduler.wait()
     publisher.wait()
+    removal.wait()
 
     print('[*] big-fiubrother-scheduler stopped!')

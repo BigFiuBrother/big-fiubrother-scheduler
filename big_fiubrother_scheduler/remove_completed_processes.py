@@ -14,20 +14,24 @@ class RemoveCompletedProcesses(QueueTask):
         self.configuration = configuration
 
     def init(self):
-        self.db = Database(configuration)
+        self.db = Database(self.configuration)
 
     def execute_with(self, video_chunk_id):
         frame_ids = (
-            self.db.query(Frame.id)
+            self.db.session
+            .query(Frame.id)
             .filter(Frame.video_chunk_id == video_chunk_id)
-            .all
+            .all()
         )
 
-        with self.db.transaction():
-            for frame_id in frame_ids:
-                self.db.delete(FrameProcess(frame_id=frame_id))
+        for frame_id in frame_ids:
+            self.db.delete(
+                FrameProcess,
+                FrameProcess.frame_id == frame_id)
 
-            self.db.delete(VideoChunkProcess(video_chunk_id=video_chunk_id))
+        self.db.delete(
+            VideoChunkProcess,
+            VideoChunkProcess.video_chunk_id == video_chunk_id)
 
     def close(self):
         self.db.close()
